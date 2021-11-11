@@ -10,23 +10,19 @@ podTemplate(
         stage('Check directory') {
             sh 'ls -lah'
         }
-         input {
-                message "please input a tag"
-                parameters {
-                    string(name: 'TAG', defaultValue: 'latest', description: 'tag your image version')
-                }
-            }
+         
       
         container('docker'){
             withCredentials([usernamePassword(credentialsId: 'DockerCredential', usernameVariable: 'USER', passwordVariable: 'PASSWD')]) {
                   stage('Build') {
-                    sh 'docker build -t kriscloud001/jrcms-private:$TAG .'
+                     
+                    sh 'docker build -t kriscloud001/jrcms-private:V4 .'
                   }
                  stage('Docker hub login') {
                     sh 'docker login --username ${USER} --password ${PASSWD}'
                   }
                   stage('Docker push') {
-                      sh 'docker push kriscloud001/jrcms-private:$TAG'
+                      sh 'docker push kriscloud001/jrcms-private:V4'
                   }
             }
         }
