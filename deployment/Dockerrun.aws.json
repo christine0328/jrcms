@@ -1,7 +1,7 @@
 {
   "AWSEBDockerrunVersion": "1",
   "Image": {
-    "Name": "kriscloud001/jrcms-private:$TAG",
+    "Name": "kriscloud001/jrcms-private:TAG",
     "Update": "true"
   },
   "Ports": [
