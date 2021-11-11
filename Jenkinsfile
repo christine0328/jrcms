@@ -15,7 +15,6 @@ podTemplate(
         container('docker'){
             withCredentials([usernamePassword(credentialsId: 'DockerCredential', usernameVariable: 'USER', passwordVariable: 'PASSWD')]) {
                   stage('Build') {
-                     
                     sh 'docker build -t kriscloud001/jrcms-private:V4 .'
                   }
                  stage('Docker hub login') {
@@ -39,13 +38,11 @@ podTemplate(
   
    
     def deployToEB(environment) {
-            checkout scm
             withCredentials([usernamePassword(credentialsId: 'aws-eb', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                 container('eb') {
                     withEnv(["AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}", "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}", "AWS_REGION=us-east-2"]) {
                         dir("deployment") {
                         sh "sh generate-dockerrun.sh ${currentBuild.number}"
-                        sh "eb init"
                         sh "eb use Jrcms-${environment}"
                         sh "eb deploy Jrcms-${environment} -l ${currentBuild.number}"
                         }
