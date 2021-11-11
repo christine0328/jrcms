@@ -45,7 +45,8 @@ podTemplate(
                     withEnv(["AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}", "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}", "AWS_REGION=us-east-2"]) {
                         dir("deployment") {
                         sh "sh generate-dockerrun.sh ${currentBuild.number}"
-                        sh "eb list --region us-east-2"
+                        sh "eb status --verbose"
+                        sh "eb list"
                         sh "eb use Jrcms-${environment}"
                         sh "eb deploy Jrcms-${environment} -l ${currentBuild.number}"
                         }
