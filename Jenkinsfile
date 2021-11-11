@@ -1,83 +1,51 @@
-/**
-* Requirement:
-* 1. Kubernetes cluster
-* 2. Credentials: 
-*    - docker-hub
-*    - aws-eb-key
-* 3. AWS Elastic Benstalk in us-east-1 region
-*    - Application: jrcms
-*    - Environment: jrcms-test, jrcms-staging and jrcms-production
-**/
-
 podTemplate(
-        containers: [containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
-                     containerTemplate(name: 'eb', image: 'mini/eb-cli', command: 'cat', ttyEnabled: true)],
-        volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')]
-  ) {
-
-  node(POD_LABEL) {
+    containers: [
+        containerTemplate(image: 'docker', name: 'docker', command: 'cat', ttyEnabled: true),
+        containerTemplate(name: 'eb', image: 'mini/eb-cli', command: 'cat', ttyEnabled: true)], 
+    volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')]) {
+    node(POD_LABEL) {
+        stage('Git pull') {
+            git 'https://github.com/christine0328/jrcms.git'
+        }
+        stage('Check directory') {
+            sh 'ls -lah'
+        }
       
-    def image
-    withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'USER', passwordVariable: 'PASSWD')]) {
-        image = "${USER}/jrcms:${currentBuild.number}"
-    }
-    
-    stage('Build and Test') {
-        checkout scm
-        container('docker') {
-            sh "docker build -t ${image} ."
-        }
-    }
-    
-    if (env.BRANCH_NAME == 'master') {
-        stage('Push Docker image') {
-            withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'USER', passwordVariable: 'PASSWD')]) {
-            container('docker') {
-                sh "docker login --username ${USER} --password ${PASSWD}"
-                sh "docker push ${image}"
-            }
+        container('docker'){
+            withCredentials([usernamePassword(credentialsId: 'DockerCredential', usernameVariable: 'USER', passwordVariable: 'PASSWD')]) {
+                  stage('Build') {
+                    sh 'docker build -t kriscloud001/jrcms-private:$TAG .'
+                  }
+                 stage('Docker hub login') {
+                    sh 'docker login --username ${USER} --password ${PASSWD}'
+                  }
+                  stage('Docker push') {
+                      sh 'docker push kriscloud001/jrcms-private:$TAG'
+                  }
             }
         }
-        
+         if (env.BRANCH_NAME == 'master') {
+    
         stage("Deploy to test environment") {
             deployToEB('test')
         }
-        
-        stage("Integration test to test environment") {  
-            smokeTest('test')
         }
         
-        stage("Deploy to staging environment") {
-            deployToEB('staging')
-        }
         
-        stage("Integration test to staging environment") {  
-            smokeTest('staging')
-        }
-        
-        stage("Deploy to production environment") {
-            deployToEB('production')
-        }
     }
   }
-}
-
-def smokeTest(environment) {     
-    container('eb') {
-       
-    }
-}
-
-def deployToEB(environment) {
-    checkout scm
-    withCredentials([usernamePassword(credentialsId: 'aws-eb-key', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-            container('eb') {
-                withEnv(["AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}", "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}", "AWS_REGION=us-east-1"]) {
-                    dir("deployment") {
-                    sh "sh generate-dockerrun.sh ${currentBuild.number}"
-                    sh "eb deploy jrcms-${environment} -l ${currentBuild.number}"
+  
+   
+    def deployToEB(environment) {
+            checkout scm
+            withCredentials([usernamePassword(credentialsId: 'aws-eb', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                container('eb') {
+                    withEnv(["AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}", "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}", "AWS_REGION=us-east-2"]) {
+                        dir("deployment") {
+                        sh "sh generate-dockerrun.sh ${currentBuild.number}"
+                        sh "eb deploy Jrcms-${environment} -l ${currentBuild.number}"
+                        }
                     }
-                }
+                }    
             }
-    }
-}
+     }
