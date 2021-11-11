@@ -4,9 +4,7 @@ podTemplate(
         containerTemplate(name: 'eb', image: 'mini/eb-cli', command: 'cat', ttyEnabled: true)], 
     volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')]) {
     node(POD_LABEL) {
-        stage('Git pull') {
-            git 'https://github.com/christine0328/jrcms.git'
-        }
+        
         stage('Check directory') {
             sh 'ls -lah'
         }
@@ -15,6 +13,7 @@ podTemplate(
         container('docker'){
             withCredentials([usernamePassword(credentialsId: 'DockerCredential', usernameVariable: 'USER', passwordVariable: 'PASSWD')]) {
                   stage('Build') {
+                    checkout scm
                     sh 'docker build -t kriscloud001/jrcms-private:V4 .'
                   }
                  stage('Docker hub login') {
@@ -38,6 +37,7 @@ podTemplate(
   
    
     def deployToEB(environment) {
+            checkout scm
             withCredentials([usernamePassword(credentialsId: 'aws-eb', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                 container('eb') {
                     withEnv(["AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}", "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}", "AWS_REGION=us-east-2"]) {
