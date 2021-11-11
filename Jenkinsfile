@@ -10,6 +10,12 @@ podTemplate(
         stage('Check directory') {
             sh 'ls -lah'
         }
+         input {
+                message "please input a tag"
+                parameters {
+                    string(name: 'TAG', defaultValue: 'latest', description: 'tag your image version')
+                }
+            }
       
         container('docker'){
             withCredentials([usernamePassword(credentialsId: 'DockerCredential', usernameVariable: 'USER', passwordVariable: 'PASSWD')]) {
