@@ -46,7 +46,7 @@ podTemplate(
                         dir("deployment") {
                         sh "sh generate-dockerrun.sh ${currentBuild.number}"
                         sh "eb list --region us-east-2"
-                        sh "eb user Jrcms-${environment}"
+                        sh "eb use Jrcms-${environment}"
                         sh "eb deploy Jrcms-${environment} -l ${currentBuild.number}"
                         }
                     }
