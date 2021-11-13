@@ -41,17 +41,19 @@ podTemplate(
     }
   }
 
- 
+  def test_url = ""
+
+  def status = 100    
 
   def smokeTest(environment) {
       
       container('eb') {
           script  { 
-            TEST_URL = "http://jrcms-${enviroment}.eba-aw7nmmrz.us-east-2.elasticbeanstalk.com/"
-            status = sh(script: "curl -sLI -w %{http_code} $TEST_URL -o /dev/null", returnStdout: true)
+            env.test_url = "http://jrcms-${enviroment}.eba-aw7nmmrz.us-east-2.elasticbeanstalk.com/"
+            env.status = sh(script: "curl -sLI -w %{http_code} ${env.test_url} -o /dev/null", returnStdout: true).trim()
     
           if(status != 200 && status != 201) {
-              error("Returned status code = $status when calling $TEST_URL")
+              error("Returned status code = ${env.status} when calling ${env.test_url}")
           }
           }
       }
