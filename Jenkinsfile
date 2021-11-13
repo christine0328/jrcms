@@ -47,17 +47,10 @@ podTemplate(
   }
 
   def smokeTest(environment) {
-      stage('Stage-One') {
             steps {
                 script{
                     sh "${CMD} > commandResult"
                     env.status = readFile('commandResult').trim()
-                }
-            }
-        }
-        stage('Stage-Two') {
-            steps {
-                script {
                     sh "echo ${env.status}"
                     if (env.status == '200') {
                         currentBuild.result = "SUCCESS"
@@ -67,7 +60,8 @@ podTemplate(
                     }
                 }
             }
-        }
+        
+  
   }
   
    
