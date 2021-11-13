@@ -33,7 +33,7 @@ podTemplate(
                         deployToEB('test')
                     }
                     stage("Integration test to test environment") {  
-                        steps {
+                   
                             script{
                                 sh "${CMD} > commandResult"
                                 env.status = readFile('commandResult').trim()
@@ -45,7 +45,7 @@ podTemplate(
                                     currentBuild.result = "FAILURE"
                                 }
                             }
-                        }
+                        
                     }
                 }
             }
