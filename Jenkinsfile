@@ -22,14 +22,15 @@ podTemplate(
                   stage('Docker push') {
                       sh 'docker push kriscloud001/jrcms-private:V4'
                   }
+                 if (env.BRANCH_NAME == 'master') {
+    
+                    stage("Deploy to test environment") {
+                        deployToEB('test')
+                    }
+        }
             }
         }
-         if (env.BRANCH_NAME == 'master') {
-    
-        stage("Deploy to test environment") {
-            deployToEB('test')
-        }
-        }
+
         
         
     }
