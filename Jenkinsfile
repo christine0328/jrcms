@@ -33,8 +33,20 @@ podTemplate(
                         deployToEB('test')
                     }
                     stage("Integration test to test environment") {  
-                         smokeTest('test')
-                 }
+                        steps {
+                            script{
+                                sh "${CMD} > commandResult"
+                                env.status = readFile('commandResult').trim()
+                                sh "echo ${env.status}"
+                                if (env.status == '200') {
+                                    currentBuild.result = "SUCCESS"
+                                }
+                                else {
+                                    currentBuild.result = "FAILURE"
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -47,19 +59,7 @@ podTemplate(
   }
 
   def smokeTest(environment) {
-            steps {
-                script{
-                    sh "${CMD} > commandResult"
-                    env.status = readFile('commandResult').trim()
-                    sh "echo ${env.status}"
-                    if (env.status == '200') {
-                        currentBuild.result = "SUCCESS"
-                    }
-                    else {
-                        currentBuild.result = "FAILURE"
-                    }
-                }
-            }
+            
         
   
   }
