@@ -9,7 +9,11 @@ podTemplate(
             sh 'ls -lah'
         }
          
-      
+       environment{
+             CHECK_URL = "http://jrcms-test.eba-aw7nmmrz.us-east-2.elasticbeanstalk.com/"
+        CMD = "curl --write-out %{http_code} --silent --output /dev/null ${CHECK_URL}"
+
+    }
         container('docker'){
             withCredentials([usernamePassword(credentialsId: 'DockerCredential', usernameVariable: 'USER', passwordVariable: 'PASSWD')]) {
                   stage('Build') {
@@ -43,21 +47,27 @@ podTemplate(
   }
 
   def smokeTest(environment) {
-    environment{
-        CHECK_URL = "http://jrcms-${enviroment}.eba-aw7nmmrz.us-east-2.elasticbeanstalk.com/"
-        CMD = "curl --write-out %{http_code} --silent --output /dev/null ${CHECK_URL}"
-
-    }
-      container('eb') {
-           script{
+      stage('Stage-One') {
+            steps {
+                script{
                     sh "${CMD} > commandResult"
                     env.status = readFile('commandResult').trim()
-                
-                 if(env.status != 200 && env.status != 201) {
-              error("Returned status code = ${env.status} when calling ${CHECK_URL}")
-          }
-          }
-      }
+                }
+            }
+        }
+        stage('Stage-Two') {
+            steps {
+                script {
+                    sh "echo ${env.status}"
+                    if (env.status == '200') {
+                        currentBuild.result = "SUCCESS"
+                    }
+                    else {
+                        currentBuild.result = "FAILURE"
+                    }
+                }
+            }
+        }
   }
   
    
