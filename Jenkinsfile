@@ -9,11 +9,7 @@ podTemplate(
             sh 'ls -lah'
         }
          
-       environment{
-             CHECK_URL = "http://jrcms-test.eba-aw7nmmrz.us-east-2.elasticbeanstalk.com/"
-        CMD = "curl --write-out %{http_code} --silent --output /dev/null ${CHECK_URL}"
-
-    }
+    
         container('docker'){
             withCredentials([usernamePassword(credentialsId: 'DockerCredential', usernameVariable: 'USER', passwordVariable: 'PASSWD')]) {
                   stage('Build') {
@@ -33,7 +29,11 @@ podTemplate(
                         deployToEB('test')
                     }
                     stage("Integration test to test environment") {  
-                   
+                      environment{
+             CHECK_URL = "http://jrcms-test.eba-aw7nmmrz.us-east-2.elasticbeanstalk.com/"
+        CMD = "curl --write-out %{http_code} --silent --output /dev/null ${CHECK_URL}"
+
+    }
                             script{
                                 sh "${CMD} > commandResult"
                                 env.status = readFile('commandResult').trim()
