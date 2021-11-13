@@ -27,13 +27,27 @@ podTemplate(
                     stage("Deploy to test environment") {
                         deployToEB('test')
                     }
-        }
+                }
             }
+        }
+
+        stage("Integration test to test environment") {  
+            smokeTest('test')
         }
 
         
         
     }
+  }
+
+  def smokeTest(environment) {
+      container('eb') {
+          String test_url = "http://jrcms-${enviroment}.eba-aw7nmmrz.us-east-2.elasticbeanstalk.com/"
+          int status = sh(script: "curl -sLI -w '%{http_code}' $test_url -o /dev/null", returnStdout: true)
+          if(status != 200 && status != 201) {
+              error("Returned status code = $status when calling $test_url")
+          }
+      }
   }
   
    
