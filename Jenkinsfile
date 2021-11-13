@@ -42,10 +42,6 @@ podTemplate(
     }
   }
 
-  def test_url = ""
-
-  def status = 100    
-
   def smokeTest(environment) {
     environment{
         CHECK_URL = "http://jrcms-${enviroment}.eba-aw7nmmrz.us-east-2.elasticbeanstalk.com/"
