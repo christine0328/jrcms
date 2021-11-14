@@ -30,6 +30,7 @@ podTemplate(
                     }
                     stage("Integration test to test environment") {  
                         def CHECK_URL = "http://jrcms-test.eba-aw7nmmrz.us-east-2.elasticbeanstalk.com/"
+                                sh "which curl"
                         def response = sh(script: "curl --write-out %{http_code} --silent --output /dev/null ${CHECK_URL}", returnStdout: true)
 
                                 sh "echo ${response}"
