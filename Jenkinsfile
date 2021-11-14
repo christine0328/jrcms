@@ -32,7 +32,7 @@ podTemplate(
                         sh 'pwd'
                         def CHECK_URL = "http://jrcms-test.eba-aw7nmmrz.us-east-2.elasticbeanstalk.com/"
                         def response = sh(script: "sh /usr/bin/curl -sLI -w %{http_code} ${CHECK_URL} -o /dev/null", returnStdout: true)
-
+                                sh "curl --version"
                                 sh "echo ${response}"
                                 if (response == '200') {
                                     currentBuild.result = "SUCCESS"
