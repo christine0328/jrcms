@@ -30,12 +30,11 @@ podTemplate(
                     }
                     stage("Integration test to test environment") {  
                         def CHECK_URL = "http://jrcms-test.eba-aw7nmmrz.us-east-2.elasticbeanstalk.com/"
-                        def CMD = "curl --write-out %{http_code} --silent --output /dev/null ${CHECK_URL}"
-                           
-                                sh "${CMD} > commandResult"
-                                def status = readFile('commandResult').trim()
-                                sh "echo ${env.status}"
-                                if (env.status == '200') {
+                        def response = sh(script: 'curl https://some-host/some-service/getApi?apikey=someKey', returnStdout: true)
+
+
+                               sh "echo ${response}"
+                                if (response == '200') {
                                     currentBuild.result = "SUCCESS"
                                 }
                                 else {
