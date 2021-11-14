@@ -29,14 +29,11 @@ podTemplate(
                         deployToEB('test')
                     }
                     stage("Integration test to test environment") {  
-                      environment{
-             CHECK_URL = "http://jrcms-test.eba-aw7nmmrz.us-east-2.elasticbeanstalk.com/"
-        CMD = "curl --write-out %{http_code} --silent --output /dev/null ${CHECK_URL}"
-
-    }
-                            script{
+                        def CHECK_URL = "http://jrcms-test.eba-aw7nmmrz.us-east-2.elasticbeanstalk.com/"
+                        def CMD = "curl --write-out %{http_code} --silent --output /dev/null ${CHECK_URL}"
+                           
                                 sh "${CMD} > commandResult"
-                                env.status = readFile('commandResult').trim()
+                                def status = readFile('commandResult').trim()
                                 sh "echo ${env.status}"
                                 if (env.status == '200') {
                                     currentBuild.result = "SUCCESS"
@@ -44,7 +41,7 @@ podTemplate(
                                 else {
                                     currentBuild.result = "FAILURE"
                                 }
-                            }
+                            
                         
                     }
                 }
